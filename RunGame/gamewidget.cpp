@@ -55,7 +55,9 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
+                            r->reduceHp();
                             barrier.clear();
+                            break ;
                         }
                         (*i)->move();
                     }
@@ -81,6 +83,7 @@ void gamewidget::paintEvent(QPaintEvent *event)
     }
     else
     {
+        //qDebug()<<r->getX()<<r->getY();
        // painter.drawPixmap(QRect(0,0,this->width(),this->height())
                  //    ,background_up
           //           ,QRect(backImgX[0],0,this->width(),this->height()));
@@ -131,10 +134,32 @@ void gamewidget::paintEvent(QPaintEvent *event)
         }
         //绘制人物
        painter.drawPixmap(QRect(r->getX(),r->getY(),r->getWid(),r->getHei()),r->getImg());
+
+
+       //血量绘制
+       painter.drawRect(QRect(1000,50,150,10));
+       painter.fillRect(QRect(1000,50,r->getCurHpPercent()*150/100,10),Qt::red);
+       painter.drawLine(1050,50,1050,60);
+       painter.drawLine(1100,50,1100,60);
+       QPen pen1(Qt::black);
+       painter.setFont(QFont("黑体",20));
+       pen1.setColor(Qt::black);
+       painter.setPen(pen1);
+       painter.drawText(1000,100,QString("HP:%1%").arg(r->getCurHpPercent()));
+
        //绘制障碍物
        for(auto i=barrier.begin();i!=barrier.end();i++)
        {
            painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+       for(auto i=barrier2.begin();i!=barrier2.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+       for(auto i=barrier3.begin();i!=barrier3.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+           qDebug()<<0;
        }
        update();
     }
@@ -154,6 +179,36 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
         LastWall_time=0;
     }
     LastWall_time++;
+
+    static int LastCoin_time;
+    srand(time(NULL));
+    if(LastCoin_time>=150)
+    {
+
+        int x=50 ;
+
+        int y=50;
+        barrier2.push_back(new Coin(x,y,20,20));
+        LastCoin_time=0;
+        //qDebug()<<12333;
+    }
+    LastCoin_time++;
+
+    static int LastArrow_time;
+    srand(time(NULL));
+    if(LastArrow_time>=100)
+    {
+
+        int x=500;
+        int y=500;
+        barrier3.push_back(new Arrow(x,y,400,100));
+        LastArrow_time=0;
+         qDebug()<<12333;
+    }
+    LastArrow_time++;
+
+
+
 }
 void gamewidget::start_game()
 {
@@ -180,12 +235,32 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key()==Qt::Key_Escape)
     {
-        esc=true;
+        if(isPause==false)
+        {
+            gamepause();
+        }
+        else
+        {
+            gamecontinue()  ;
+        }
     }
+
     else
     {
         return QWidget::keyPressEvent(event);
     }
+}
+void gamewidget::gamepause()
+{
+    isPause = true;
+    remove.stop() ;
+    r->pauserole();
+}
+void gamewidget::gamecontinue()
+{
+    isPause = false;
+    remove.start() ;
+    r->continuerole();
 }
 void gamewidget::keyReleaseEvent(QKeyEvent *event){
     if(event->key()==Qt::Key_W)

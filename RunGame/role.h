@@ -23,6 +23,14 @@ private:
     int x;
     int y;
 
+    //设置血量
+    int hp ;
+    int hpmax ;
+
+    QTimer runImgChangeTimer ;
+
+    int curRunImg=0;
+
 public:
    // explicit role(QWidget *parent = nullptr);
     role(gamewidget *game);
@@ -42,6 +50,14 @@ public:
     int getHei();
     void move(bool up,bool down,bool right,bool esc);  //人物坐标移动
     QPixmap getImg();
+    void pauserole();
+    void continuerole();
+
+    //HP相关
+    void reduceHp();
+    void increaseHp(int d);
+    int getCurHp();
+    int getCurHpPercent();
 
 signals:
 
